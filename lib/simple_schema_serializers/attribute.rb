@@ -1,0 +1,88 @@
+# frozen_string_literal: true
+
+module SimpleSchemaSerializers
+  # A container class for a single property of a +HashSerializable+.
+  class Attribute
+    attr_reader :name, :serializer, :source
+
+    def initialize(name, serializer, options)
+      @name = name.to_s
+      @serializer = serializer
+      @options = options
+      @source = @options.delete(:source) || name
+      @conditional = @options.delete(:if)
+      @required = @options.key?(:required) ? @options.delete(:required) : !(hidden? || conditional?)
+    end
+
+    def skip?(serializer_instance)
+      return false unless conditional?
+
+      !check_condition(serializer_instance)
+    end
+
+    def hidden?
+      @options[:hidden]
+    end
+
+    def serialize(serializer_instance)
+      value = value_from(serializer_instance) || default_value
+      serializer.serialize(value, @options.merge(serializer_instance.options))
+    end
+
+    def required?
+      @required
+    end
+
+    def schema(additional_options = {})
+      serializer.schema(@options.transform_keys(&:to_s).merge(additional_options))
+    end
+
+    private
+
+    def value_from(serializer_instance)
+      if serializer_instance.object.is_a?(Hash)
+        if serializer_instance.public_methods(false).include?(source)
+          serializer_instance.public_send(source)
+        elsif serializer_instance.object.key?(source)
+          serializer_instance.object[source]
+        elsif serializer_instance.object.key?(source.to_s)
+          serializer_instance.object[source.to_s]
+        else
+          return nil if @options[:allow_missing_key]
+
+          raise DeclarationError, "Key `#{source}` missing from hash instance `#{name}`"\
+            "in `#{serializer_instance.class.name}`. If this is intentional, specify "\
+            'option `allow_missing_key: true`'
+        end
+      elsif serializer_instance.respond_to?(source, false)
+        serializer_instance.public_send(source)
+      elsif serializer_instance.object.respond_to?(source, false)
+        serializer_instance.object.public_send(source)
+      else
+        raise DeclarationError, "Unknown method or key `#{source}` for attribute"\
+          " `#{name}` of `#{serializer_instance.class.name}`"
+      end
+    rescue ArgumentError => e
+      raise ArgumentError, "Problem accessing `#{source}` on #{serializer_instance.object} in "\
+        "#{serializer_instance.class.name}: #{e.message}"
+    end
+
+    def default_value
+      @options[:default]
+    end
+
+    def conditional?
+      @conditional
+    end
+
+    def check_condition(serializer_instance)
+      if @conditional.respond_to?(:call)
+        serializer_instance.instance_exec(&@conditional)
+      elsif serializer_instance.respond_to?(@conditional)
+        serializer_instance.public_send(@conditional)
+      else
+        serializer_instance.object.public_send(@conditional)
+      end
+    end
+  end
+end
