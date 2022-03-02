@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'simple_schema_serializers/declaration_error'
+
 module SimpleSchemaSerializers
   # methods for the block scope of `hash_attribute` method
   module HashDSL

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'simple_schema_serializers/declaration_error'
 require 'simple_schema_serializers/serializable'
 
 module SimpleSchemaSerializers

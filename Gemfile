@@ -16,3 +16,7 @@ gemspec
 gem 'byebug'
 
 gem 'rspec', '~> 3.8.0'
+
+gem 'rubocop', '~> 1.21'
+
+gem 'bundler-audit', require: false

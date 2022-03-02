@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'simple_schema_serializers/declaration_error'
+
 module SimpleSchemaSerializers
   # A container class for a single property of a +HashSerializable+.
   class Attribute
@@ -41,30 +43,34 @@ module SimpleSchemaSerializers
 
     def value_from(serializer_instance)
       if serializer_instance.object.is_a?(Hash)
-        if serializer_instance.public_methods(false).include?(source)
-          serializer_instance.public_send(source)
-        elsif serializer_instance.object.key?(source)
-          serializer_instance.object[source]
-        elsif serializer_instance.object.key?(source.to_s)
-          serializer_instance.object[source.to_s]
-        else
-          return nil if @options[:allow_missing_key]
-
-          raise DeclarationError, "Key `#{source}` missing from hash instance `#{name}`"\
-            "in `#{serializer_instance.class.name}`. If this is intentional, specify "\
-            'option `allow_missing_key: true`'
-        end
+        value_from_hash(serializer_instance)
       elsif serializer_instance.respond_to?(source, false)
         serializer_instance.public_send(source)
       elsif serializer_instance.object.respond_to?(source, false)
         serializer_instance.object.public_send(source)
       else
         raise DeclarationError, "Unknown method or key `#{source}` for attribute"\
-          " `#{name}` of `#{serializer_instance.class.name}`"
+                                " `#{name}` of `#{serializer_instance.class.name}`"
       end
     rescue ArgumentError => e
       raise ArgumentError, "Problem accessing `#{source}` on #{serializer_instance.object} in "\
-        "#{serializer_instance.class.name}: #{e.message}"
+                           "#{serializer_instance.class.name}: #{e.message}"
+    end
+
+    def value_from_hash(serializer_instance)
+      if serializer_instance.public_methods(false).include?(source)
+        serializer_instance.public_send(source)
+      elsif serializer_instance.object.key?(source)
+        serializer_instance.object[source]
+      elsif serializer_instance.object.key?(source.to_s)
+        serializer_instance.object[source.to_s]
+      else
+        return nil if @options[:allow_missing_key]
+
+        raise DeclarationError, "Key `#{source}` missing from hash instance `#{name}`"\
+                                "in `#{serializer_instance.class.name}`. If this is intentional, specify "\
+                                'option `allow_missing_key: true`'
+      end
     end
 
     def default_value

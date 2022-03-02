@@ -19,7 +19,7 @@ describe SimpleSchemaSerializers::Serializer do
           'foo' => { 'type' => 'string' }
         }
       )
-      expect(serializer.serialize(OpenStruct.new(foo: 'bar'))).to eq('foo' => 'bar')
+      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq('foo' => 'bar')
     end
 
     it 'should allow you to provide an implementation method' do
@@ -27,14 +27,14 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :hello_foo, :string
 
         def hello_foo
-          raise StandardError, 'Missing Object' unless object.is_a?(OpenStruct)
+          raise StandardError, 'Missing Object' unless object
           raise StandardError, 'Missing Scope' unless options[:some] == 'scope'
 
           "Hello, #{object.foo}"
         end
       end
 
-      expect(serializer.serialize(OpenStruct.new(foo: 'bar'), some: 'scope')).to eq('hello_foo' => 'Hello, bar')
+      expect(serializer.serialize(double(:thing, foo: 'bar'), some: 'scope')).to eq('hello_foo' => 'Hello, bar')
     end
 
     it 'should allow referencing a Serializable instance directly' do
@@ -45,7 +45,7 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :child, child_serializer
       end
 
-      resource = OpenStruct.new(child: OpenStruct.new(foo: 'bar'))
+      resource = double(:parent, child: double(:child, foo: 'bar'))
       expect(parent_serializer.serialize(resource)).to eq(
         'child' => {
           'foo' => 'bar'
@@ -71,7 +71,7 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :hello_foo, :string, source: :foo
       end
 
-      expect(serializer.serialize(OpenStruct.new(foo: 'bar'))).to eq('hello_foo' => 'bar')
+      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq('hello_foo' => 'bar')
     end
 
     describe 'Hash objects' do
@@ -154,7 +154,7 @@ describe SimpleSchemaSerializers::Serializer do
           'required' => ['documented'],
           'properties' => { 'documented' => { 'type' => 'string' } }
         )
-        expect(serializer.serialize(OpenStruct.new(documented: 'yes', undocumented: 'no'))).to eq(
+        expect(serializer.serialize(double(:thing, documented: 'yes', undocumented: 'no'))).to eq(
           'documented' => 'yes',
           'undocumented' => 'no'
         )
@@ -167,8 +167,8 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :conditional, :string, if: proc { object.condition }
           attribute :other, :string
         end
-        yes_resource = OpenStruct.new(conditional: 'foo', other: 'other', condition: true)
-        no_resource = OpenStruct.new(conditional: 'foo', other: 'other', condition: false)
+        yes_resource = double(:yes, conditional: 'foo', other: 'other', condition: true)
+        no_resource = double(:no, conditional: 'foo', other: 'other', condition: false)
 
         expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
         expect(serializer.serialize(no_resource)).to eq('other' => 'other')
@@ -179,8 +179,8 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :conditional, :string, if: -> { object.condition }
           attribute :other, :string
         end
-        yes_resource = OpenStruct.new(conditional: 'foo', other: 'other', condition: true)
-        no_resource = OpenStruct.new(conditional: 'foo', other: 'other', condition: false)
+        yes_resource = double(:yes, conditional: 'foo', other: 'other', condition: true)
+        no_resource = double(:no, conditional: 'foo', other: 'other', condition: false)
 
         expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
         expect(serializer.serialize(no_resource)).to eq('other' => 'other')
@@ -195,8 +195,8 @@ describe SimpleSchemaSerializers::Serializer do
             object.conditional == 'foo'
           end
         end
-        yes_resource = OpenStruct.new(conditional: 'foo', other: 'other')
-        no_resource = OpenStruct.new(conditional: 'bar', other: 'other')
+        yes_resource = double(:yes, conditional: 'foo', other: 'other')
+        no_resource = double(:no, conditional: 'bar', other: 'other')
 
         expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
         expect(serializer.serialize(no_resource)).to eq('other' => 'other')
@@ -213,7 +213,7 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(name: 'x', child: OpenStruct.new(foo: 'foo', bar: nil))
+        resource = double(:parent, name: 'x', child: double(:child, foo: 'foo', bar: nil))
         expect(serializer.serialize(resource)).to eq(
           'name' => 'x',
           'child' => {
@@ -232,7 +232,7 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(name: 'x', child: nil)
+        resource = double(:thing, name: 'x', child: nil)
         expect(serializer.serialize(resource)).to eq(
           'name' => 'x',
           'child' => nil
@@ -253,7 +253,7 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(name: 'x', child: [OpenStruct.new(foo: 'foo', bar: nil)])
+        resource = double(:parent, name: 'x', child: [double(:child, foo: 'foo', bar: nil)])
         expect(serializer.serialize(resource)).to eq(
           'name' => 'x',
           'child' => [{
@@ -278,7 +278,7 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(name: 'x', child: [nil, OpenStruct.new(foo: 'foo', bar: nil)])
+        resource = double(:parent, name: 'x', child: [nil, double(:child, foo: 'foo', bar: nil)])
         expect(serializer.serialize(resource)).to eq(
           'name' => 'x',
           'child' => [nil, {
@@ -303,7 +303,7 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(name: 'x', child: nil)
+        resource = double(:thing, name: 'x', child: nil)
         expect(serializer.serialize(resource)).to eq(
           'name' => 'x',
           'child' => nil
@@ -347,10 +347,9 @@ describe SimpleSchemaSerializers::Serializer do
           end
         end
 
-        resource = OpenStruct.new(
-          child: OpenStruct.new(foo: 'child_foo'),
-          child_array: [OpenStruct.new(foo: 'child_array_foo')]
-        )
+        resource = double(:parent,
+                          child: double(:child1, foo: 'child_foo'),
+                          child_array: [double(:child2, foo: 'child_array_foo')])
         expect(serializer.serialize(resource)).to eq(
           'foo' => 'parent_foo',
           'child' => { 'foo' => 'child_foo' },
@@ -451,7 +450,7 @@ describe SimpleSchemaSerializers::Serializer do
           items child_serializer
         end
       end
-      resource = OpenStruct.new(primitive_array: ['a', 'b'], object_array: [OpenStruct.new(foo: 'bar')])
+      resource = double(:parent, primitive_array: ['a', 'b'], object_array: [double(:child, foo: 'bar')])
 
       expect(parent_serializer.serialize(resource)).to eq(
         'primitive_array' => ['a', 'b'],
@@ -483,7 +482,7 @@ describe SimpleSchemaSerializers::Serializer do
       end
       expect(serializer.schema['properties']['array']['maxItems']).to eq 2
       expect(serializer.schema['required']).to be_empty
-      expect(serializer.serialize(OpenStruct.new(array: ['a'], conditional: false))).to eq({})
+      expect(serializer.serialize(double(:thing, array: ['a'], conditional: false))).to eq({})
     end
 
     it 'should allow you to provide a default value' do
@@ -491,7 +490,7 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :foo, :string, default: 'unknown'
       end
       expect(serializer.schema['properties']['foo']['default']).to eq 'unknown'
-      expect(serializer.serialize(OpenStruct.new(foo: nil))).to eq('foo' => 'unknown')
+      expect(serializer.serialize(double(:thing, foo: nil))).to eq('foo' => 'unknown')
     end
 
     it 'should allow you to provide attribute defaults' do
@@ -507,21 +506,23 @@ describe SimpleSchemaSerializers::Serializer do
 
       expect(serializer.schema['properties']['a']['description']).to eq 'Duplicated description'
       expect(serializer.schema['properties']['b']['description']).to eq 'Duplicated description'
-      expect(serializer.serialize(OpenStruct.new(a: 'a', b: 'b'))).to eq({})
+      expect(serializer.serialize(double(:thing, a: 'a', b: 'b'))).to eq({})
     end
   end
 
   describe 'Inheritance' do
-    class InhertianceSerializerBuilder
-      attr_reader :child_serializer
+    before do
+      stub_const('InhertianceSerializerBuilder', Class.new do
+        attr_reader :child_serializer
 
-      def parent(&block)
-        @parent_serializer = Class.new(SimpleSchemaSerializers::Serializer, &block)
-      end
+        def parent(&block)
+          @parent_serializer = Class.new(SimpleSchemaSerializers::Serializer, &block)
+        end
 
-      def child(&block)
-        @child_serializer = Class.new(@parent_serializer, &block)
-      end
+        def child(&block)
+          @child_serializer = Class.new(@parent_serializer, &block)
+        end
+      end)
     end
 
     def inherited_serializers(&block)
@@ -538,7 +539,7 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :name, :string
         end
       end
-      expect(child.serialize(OpenStruct.new(id: 1, name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
+      expect(child.serialize(double(:thing, id: 1, name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
     end
 
     it 'should allow removing inherited attributes' do
@@ -553,7 +554,7 @@ describe SimpleSchemaSerializers::Serializer do
           remove_attribute :foo
         end
       end
-      expect(child.serialize(OpenStruct.new(id: 1, foo: 'bar', name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
+      expect(child.serialize(double(:thing, id: 1, foo: 'bar', name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
     end
 
     it 'should allow inheriting attribute defaults' do
@@ -595,7 +596,7 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :user, :user
         end
       end
-      expect(child.serialize(OpenStruct.new(user: OpenStruct.new(name: 'foo')))).to eq(
+      expect(child.serialize(double(:parent, user: double(:user, name: 'foo')))).to eq(
         'user' => { 'name' => 'foo' }
       )
     end

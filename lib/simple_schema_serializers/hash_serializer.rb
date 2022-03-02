@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'simple_schema_serializers/declaration_error'
 require 'simple_schema_serializers/serializable'
 require 'simple_schema_serializers/hash_schema_generator'
 require 'simple_schema_serializers/hash_dsl'
@@ -97,7 +98,7 @@ module SimpleSchemaSerializers
       def register_serializer(name, serializer, with_optional: true, override: false, aliases: [], default_options: {})
         if !override && registered_serializers[name.to_s]
           raise DeclarationError, "Serializer alias #{name} has already been registered. If you wish to "\
-            'override the alias, pass option `override: true`'
+                                  'override the alias, pass option `override: true`'
         end
         registered_serializers[name.to_s] = [serializer, default_options]
         register_serializer("#{name}?", serializer.optional, with_optional: false, override: override) if with_optional

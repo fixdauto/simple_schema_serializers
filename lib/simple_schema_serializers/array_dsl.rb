@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'simple_schema_serializers/declaration_error'
+
 module SimpleSchemaSerializers
   # Class for acting as block scope of `array_attribute` method
   class ArrayDSL
