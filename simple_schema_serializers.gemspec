@@ -16,12 +16,10 @@ Gem::Specification.new do |spec|
   spec.licenses    = ['MIT']
   spec.required_ruby_version = '>= 2.6'
 
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
-  spec.metadata['allowed_push_host'] = 'DISABLED' if spec.respond_to?(:metadata)
-
   spec.files = Dir['lib/**/*', 'Rakefile', 'README.md']
 
   spec.add_dependency 'json-schema', '~> 2.8.0'
+
+  spec.metadata['allowed_push_host'] = 'http://rubygems.org'
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
