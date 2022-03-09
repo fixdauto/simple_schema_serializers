@@ -20,7 +20,7 @@ module SimpleSchemaSerializers
     def key(serializer_instance)
       return name unless @key_transform
       return @key_transform.call(name) if @key_transform.respond_to?(:call)
-      if serializer_instance.public_methods(false).include?(@key_transform)
+      if serializer_instance.public_methods.include?(@key_transform)
         return serializer_instance.public_send(@key_transform, name)
       end
 

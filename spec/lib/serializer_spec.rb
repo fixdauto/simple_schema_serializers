@@ -617,14 +617,18 @@ describe SimpleSchemaSerializers::Serializer do
     it 'should allow inheriting key transforms' do
       child = inherited_serializers do
         parent do
-          transform_keys :upcase
+          transform_keys :upcase_keys
+
+          def upcase_keys(key)
+            options[:upcase] ? key.upcase : key
+          end
         end
 
         child do
           attribute :name, :string
         end
       end
-      expect(child.serialize({ name: 'joe' })).to eq({ 'NAME' => 'joe' })
+      expect(child.serialize({ name: 'joe' }, upcase: true)).to eq({ 'NAME' => 'joe' })
     end
   end
 
