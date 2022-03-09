@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    simple_schema_serializers (1.0.0)
+    simple_schema_serializers (1.0.1)
       case_transform (~> 0.2)
       json-schema (~> 2.8.0)
 
