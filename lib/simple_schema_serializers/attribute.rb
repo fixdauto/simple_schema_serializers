@@ -13,7 +13,18 @@ module SimpleSchemaSerializers
       @options = options
       @source = @options.delete(:source) || name
       @conditional = @options.delete(:if)
+      @key_transform = @options.delete(:key_transform)
       @required = @options.key?(:required) ? @options.delete(:required) : !(hidden? || conditional?)
+    end
+
+    def key(serializer_instance)
+      return name unless @key_transform
+      return @key_transform.call(name) if @key_transform.respond_to?(:call)
+      if serializer_instance.public_methods(false).include?(@key_transform)
+        return serializer_instance.public_send(@key_transform, name)
+      end
+
+      name.public_send(@key_transform)
     end
 
     def skip?(serializer_instance)

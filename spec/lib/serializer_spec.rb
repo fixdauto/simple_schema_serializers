@@ -613,6 +613,19 @@ describe SimpleSchemaSerializers::Serializer do
       end
       expect(child.valid?('not_name' => 'foo')).to eq false
     end
+
+    it 'should allow inheriting key transforms' do
+      child = inherited_serializers do
+        parent do
+          transform_keys :upcase
+        end
+
+        child do
+          attribute :name, :string
+        end
+      end
+      expect(child.serialize({ name: 'joe' })).to eq({ 'NAME' => 'joe' })
+    end
   end
 
   describe 'register_serializer' do
@@ -843,6 +856,30 @@ describe SimpleSchemaSerializers::Serializer do
         end
         expect(serializer.serialize(one: 'one', two: 2)).to eq('one' => 'one', 'two' => 2)
       end
+    end
+  end
+
+  describe 'key transformations' do
+    it 'should allow defining a key transformation method' do
+      serializer = create_serializer do
+        transform_keys :upcase_keys
+
+        attribute :first_name, :string
+
+        def upcase_keys(key)
+          options[:upcase] ? key.upcase : key
+        end
+      end
+      expect(serializer.serialize({ first_name: 'joe' }, upcase: false)).to eq({ 'first_name' => 'joe' })
+      expect(serializer.serialize({ first_name: 'joe' }, upcase: true)).to eq({ 'FIRST_NAME' => 'joe' })
+    end
+
+    it 'should allow applying a key_inflection to the keys' do
+      serializer = create_serializer do
+        key_inflection :camel_lower
+        attribute :first_name, :string
+      end
+      expect(serializer.serialize({ first_name: 'joe' })).to eq({ 'firstName' => 'joe' })
     end
   end
 end

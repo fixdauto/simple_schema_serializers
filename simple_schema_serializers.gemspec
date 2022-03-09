@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*', 'Rakefile', 'README.md']
 
+  spec.add_dependency 'case_transform', '~> 0.2'
   spec.add_dependency 'json-schema', '~> 2.8.0'
 
   spec.metadata['allowed_push_host'] = 'http://rubygems.org'

@@ -143,3 +143,49 @@ Aliases for the following common primitive serializers are included by default:
 - `:float`, `:float?`, `:decimal`, `:decimal?`, `:double`, `:double?`
 - `:boolean`, `:boolean?`
 - `:date`, `:date?`, `:datetime`, `:datetime?`
+
+### Key transformations
+
+Methods can be registered to transform keys from their attribute name. Key transformations are inherited.
+
+```ruby
+class ApplicationSerializer < SimpleSchemaSerializers::Serializer
+	# can be a method on string:
+	transform_keys :upper
+	# or a block:
+	transform_keys do |key|
+		key.upper
+	end
+	# or a method on the serializer
+	transform_keys :my_upper
+	def my_upper(key)
+		key.upper
+	end
+end
+```
+
+Most commonly, this is used for changing inflection, for example `camelCase`. These options are included:
+
+```ruby
+class ApplicationSerializer < SimpleSchemaSerializers::Serializer
+	# supports :camel (aka PascalCase), :camel_lower (aka camelCase),
+	#  :dash (dash-case), and :underscore (under_score)
+	key_inflection :camel_lower
+end
+```
+
+If you use the same inflection everywhere and you don't have dynamic keys, you can get some performance improvements by using a cache:
+
+```ruby
+require 'lru_redux'
+class ApplicationSerializer < SimpleSchemaSerializers::Serializer
+
+	KEY_CACHE = LruRedux::Cache.new(1000) # set the size based on the number of unique keys you have
+
+	transform_keys :camelize_key
+
+	def camelize_key(key)
+		KEY_CACHE.getset(key) { CaseTransform.camel_lower(key) }
+	end
+end
+```
