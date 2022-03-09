@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'case_transform'
 require 'simple_schema_serializers/declaration_error'
 require 'simple_schema_serializers/serializable'
 require 'simple_schema_serializers/hash_schema_generator'
@@ -36,6 +37,7 @@ module SimpleSchemaSerializers
 
       def attribute_defaults(args = nil)
         @attribute_defaults ||= {}
+        @attribute_defaults[:key_transform] = key_transformer if key_transformer
         @attribute_defaults.merge!(args) if args
         @attribute_defaults
       end
@@ -56,11 +58,25 @@ module SimpleSchemaSerializers
           attributes.concat(other_hash_serializable.attributes)
           attribute_defaults.merge!(other_hash_serializable.attribute_defaults)
         end
+        @key_transformer ||= other_hash_serializable.key_transformer
         schema_options.merge!(other_hash_serializable.schema_options)
       end
 
       def ref_name
         @name
+      end
+
+      def transform_keys(method = nil, &block)
+        @key_transformer = block || method
+      end
+
+      def key_transformer
+        @key_transformer
+      end
+
+      def key_inflection(inflection)
+        # :camel_lower, :dash, :underscore, :camel, :unaltered
+        transform_keys(CaseTransform.method(inflection))
       end
 
       def one_of(&block)
@@ -116,7 +132,7 @@ module SimpleSchemaSerializers
         attributes.each_with_object({}) do |attribute, hash|
           next if attribute.skip?(serializer_instance)
 
-          hash[attribute.name] = attribute.serialize(serializer_instance)
+          hash[attribute.key(serializer_instance)] = attribute.serialize(serializer_instance)
         end
       end
 
