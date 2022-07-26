@@ -769,6 +769,29 @@ describe SimpleSchemaSerializers::Serializer do
       expect(org_schema['properties']['employees']['items']['type']).to eq 'object'
       expect(org_schema['properties']['founders']['oneOf'][1]['items']['type']).to eq 'object'
     end
+
+    describe 'with_options' do
+      it 'should allow setting default options at the declaration level' do
+        base_serializer = create_serializer do
+          attribute :a, :integer
+          attribute :b, :integer
+          attribute :sum, :integer
+
+          def b
+            options[:b] || 0
+          end
+
+          def sum
+            object.a + b
+          end
+        end
+
+        add_five_serializer = base_serializer.with_options(b: 5)
+
+        expect(base_serializer.serialize(double(a: 1))['sum']).to eq 1
+        expect(add_five_serializer.serialize(double(a: 1))['sum']).to eq 6
+      end
+    end
   end
 
   describe 'Combo schemas' do

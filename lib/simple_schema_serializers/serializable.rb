@@ -66,6 +66,10 @@ module SimpleSchemaSerializers
       ArraySerializer.new(self, schema_args)
     end
 
+    def with_options(default_options)
+      ScopedSerializer.new(self, default_options)
+    end
+
     def ref_name
       nil
     end
@@ -81,3 +85,4 @@ module SimpleSchemaSerializers
 end
 require 'simple_schema_serializers/array_serializer'
 require 'simple_schema_serializers/optional_serializer'
+require 'simple_schema_serializers/scoped_serializer'

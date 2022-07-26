@@ -105,6 +105,12 @@ StringSerializer.optional.serialize(nil) # nil
 StringSerializer.array.serialize([:foo, :bar]) # ["foo", "bar"]
 ```
 
+It also provides `with_options`, which will set the default options for the serializer:
+
+```ruby
+MoneySerializer.with_options(currency: 'CAD').serialize(0.to_money('USD'))
+```
+
 `SimpleSchemaSerializers::Serializer` is a base class for building serializers for objects using a DSL.
 
 ### Serializer Types
