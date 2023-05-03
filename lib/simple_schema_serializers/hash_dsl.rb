@@ -34,18 +34,18 @@ module SimpleSchemaSerializers
       attributes << Attribute.new(name, lookup_serializer(serializer), opts)
     end
 
-    def hash_attribute(name, opts = {}, &block)
+    def hash_attribute(name, opts = {}, &)
       serializer = Class.new(HashSerializer)
       serializer.inherit_configuration_from(self, include_attributes: false)
-      serializer.instance_exec(&block)
+      serializer.instance_exec(&)
       serializer = serializer.optional if opts.delete(:optional)
       attribute(name, serializer, opts)
     end
 
-    def array_attribute(name, opts = {}, &block)
+    def array_attribute(name, opts = {}, &)
       desc = @desc
       @desc = nil
-      serializer, item_opts = ArrayDSL.new(self).invoke(&block)
+      serializer, item_opts = ArrayDSL.new(self).invoke(&)
       optional = opts.delete(:optional)
       array_opts, attribute_opts = opts.partition do |k, _|
         [*JSONSchema::ARRAY_KEYS, *JSONSchema::COMMON_KEYS].include?(k.to_s)

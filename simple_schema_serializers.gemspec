@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/fixdauto/simple_schema_serializers'
   spec.summary     = 'Fast model serializers with json-schema generation'
   spec.licenses    = ['MIT']
-  spec.required_ruby_version = '>= 2.6'
+  spec.required_ruby_version = '>= 3.1'
 
   spec.files = Dir['lib/**/*', 'Rakefile', 'README.md']
 

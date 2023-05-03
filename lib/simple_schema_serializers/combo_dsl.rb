@@ -29,8 +29,8 @@ module SimpleSchemaSerializers
       @selector = block
     end
 
-    def invoke(&block)
-      instance_exec(&block)
+    def invoke(&)
+      instance_exec(&)
       raise DeclarationError, "Must define at least one `option` for `#{@type}`" if @options.empty?
 
       ComboSerializer.new(@type, @options, @selector)

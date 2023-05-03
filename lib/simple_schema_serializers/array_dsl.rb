@@ -31,8 +31,8 @@ module SimpleSchemaSerializers
       @opts = opts
     end
 
-    def invoke(&block)
-      instance_exec(&block)
+    def invoke(&)
+      instance_exec(&)
       raise DeclarationError, 'Must call `items` for `array_attribute`' unless @called
 
       [@serializer, @opts]

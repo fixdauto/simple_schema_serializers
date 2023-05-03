@@ -79,22 +79,22 @@ module SimpleSchemaSerializers
         transform_keys(CaseTransform.method(inflection))
       end
 
-      def one_of(&block)
-        combo_serializer('one_of', &block)
+      def one_of(&)
+        combo_serializer('one_of', &)
       end
 
-      def any_of(&block)
-        combo_serializer('any_of', &block)
+      def any_of(&)
+        combo_serializer('any_of', &)
       end
 
-      def all_of(&block)
-        combo_serializer('all_of', &block)
+      def all_of(&)
+        combo_serializer('all_of', &)
       end
 
-      def combo_serializer(type, &block)
+      def combo_serializer(type, &)
         raise DeclarationError, 'Can only define one of `one_of`/`all_of`/`any_of`' if @combo
 
-        @combo = ComboDSL.new(self, type).invoke(&block)
+        @combo = ComboDSL.new(self, type).invoke(&)
       end
 
       ##
@@ -113,13 +113,13 @@ module SimpleSchemaSerializers
       # rubocop:disable Metrics/ParameterLists
       def register_serializer(name, serializer, with_optional: true, override: false, aliases: [], default_options: {})
         if !override && registered_serializers[name.to_s]
-          raise DeclarationError, "Serializer alias #{name} has already been registered. If you wish to "\
+          raise DeclarationError, "Serializer alias #{name} has already been registered. If you wish to " \
                                   'override the alias, pass option `override: true`'
         end
         registered_serializers[name.to_s] = [serializer, default_options]
-        register_serializer("#{name}?", serializer.optional, with_optional: false, override: override) if with_optional
+        register_serializer("#{name}?", serializer.optional, with_optional: false, override:) if with_optional
         aliases.each do |alias_name|
-          register_serializer(alias_name, serializer, with_optional: with_optional, override: override)
+          register_serializer(alias_name, serializer, with_optional:, override:)
         end
         name
       end

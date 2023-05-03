@@ -3,8 +3,8 @@
 require File.expand_path('../spec_helper', __dir__)
 
 describe SimpleSchemaSerializers::Serializer do
-  def create_serializer(&block)
-    Class.new(SimpleSchemaSerializers::Serializer, &block)
+  def create_serializer(&)
+    Class.new(SimpleSchemaSerializers::Serializer, &)
   end
 
   describe 'DSL' do
@@ -515,18 +515,18 @@ describe SimpleSchemaSerializers::Serializer do
       stub_const('InhertianceSerializerBuilder', Class.new do
         attr_reader :child_serializer
 
-        def parent(&block)
-          @parent_serializer = Class.new(SimpleSchemaSerializers::Serializer, &block)
+        def parent(&)
+          @parent_serializer = Class.new(SimpleSchemaSerializers::Serializer, &)
         end
 
-        def child(&block)
-          @child_serializer = Class.new(@parent_serializer, &block)
+        def child(&)
+          @child_serializer = Class.new(@parent_serializer, &)
         end
       end)
     end
 
-    def inherited_serializers(&block)
-      InhertianceSerializerBuilder.new.tap { |b| b.instance_exec(&block) }.child_serializer
+    def inherited_serializers(&)
+      InhertianceSerializerBuilder.new.tap { |b| b.instance_exec(&) }.child_serializer
     end
 
     it 'should allow inheriting attributes' do
