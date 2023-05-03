@@ -4,7 +4,7 @@ Simple Schema Serializers
 This gem provides a simple way to build systems for serializing Ruby classes into JSON. It's modeled after [Active Model Serializers](https://github.com/rails-api/active_model_serializers) but is simpler, faster, and maintained.
 
 ```ruby
-gem 'simple_schema_serializers', git: 'https://github.com/fixdauto/simple_schema_serializers.git', ref: 'v1.0.0'
+gem 'simple_schema_serializers', git: 'https://github.com/fixdauto/simple_schema_serializers.git', ref: 'v1.3.0'
 ```
 
 Example
@@ -53,21 +53,21 @@ All attributes have some common options that can be specified for them:
 	<dd>If true and the source is a Hash, use nil for missing keys instead of throwing an error.</dd>
 </dl>
 
-#### `attribute(name: symbol, serializer: symbol | Serializer, options: ?Hash)`
+#### `attribute(name: symbol, serializer: symbol | Serializer, **options)`
 
 The simplest attribute type. This defines a single key with a serializer. The serializer can be either a class that implements serializer, a built-in type, or a type registered with `register_serializer`. For more information, see the section on serializer types below.
 
 The source of the data defaults to a method of the original object with the same name or with the name specified by the `source` option. If a method with the same name exists in the serializer itself, that method will be called to get the data instead.
 
-#### `array_attribute(name: symbol, options: ?Hash, &block)`
+#### `array_attribute(name: symbol, **options, &block)`
 
 Defines an attribute containing an array of items. The inside of the block provides the following methods:
 
-##### `items(serializer: Serializer, opts: ?Hash, &block)`
+##### `items(serializer: Serializer, **options, &block)`
 
 Specifies the serializer to use for the items of the array. If no serializer is provided, the block acts the same as the block of `hash_attribute`.
 
-#### `hash_attribute(name: symbol, options: ?Hash, &block)`
+#### `hash_attribute(name: symbol, **options, &block)`
 
 Defines an attribute that contains an object. The inside of the block has all of the same methods available that are available at the top-level, essentially allowing you to structure the data into a hierarchy that doesn't match the original data.
 
@@ -77,7 +77,7 @@ Removes a previously defined attribute.
 
 ### Serializer Interface
 
-A `Serializer` is an object that can transform one value to another and report it's `json-schema`. It should respond to `serialize(resource, options = {})` and `schema(additional_options = {})` and include methods from `Serializable`.  Thus, any serializer can be invoked with `Serializer.serialize(resource)`. This allows you to create custom serializers for primitive types and more complex outputs. For example:
+A `Serializer` is an object that can transform one value to another and report it's `json-schema`. It should respond to `serialize(resource, **options)` and `schema(**additional_options)` and include methods from `Serializable`.  Thus, any serializer can be invoked with `Serializer.serialize(resource)`. This allows you to create custom serializers for primitive types and more complex outputs. For example:
 
 ```ruby
 class StringSerializer
@@ -86,13 +86,13 @@ class StringSerializer
   ##
   # @param resource The object to serialize
   # @param [Hash] options Optional additional context to control the behavior of the serializer
-  def self.serialize(resource, options = {})
+  def self.serialize(resource, **)
     resource.to_s
   end
 
   ##
   # @return [Hash] The JSON-Schema definition of the serializer output
-  def self.schema(additional_options = {})
+  def self.schema(**additional_options)
     { type: :string }.merge(additional_options)
   end
 end

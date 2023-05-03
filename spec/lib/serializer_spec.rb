@@ -12,14 +12,14 @@ describe SimpleSchemaSerializers::Serializer do
       serializer = create_serializer do
         attribute :foo, :string
       end
-      expect(serializer.schema).to eq(
-        'type' => 'object',
-        'required' => ['foo'],
-        'properties' => {
-          'foo' => { 'type' => 'string' }
-        }
-      )
-      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq('foo' => 'bar')
+      expect(serializer.schema).to eq({
+                                        'type' => 'object',
+                                        'required' => ['foo'],
+                                        'properties' => {
+                                          'foo' => { 'type' => 'string' }
+                                        }
+                                      })
+      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq({ 'foo' => 'bar' })
     end
 
     it 'should allow you to provide an implementation method' do
@@ -34,7 +34,7 @@ describe SimpleSchemaSerializers::Serializer do
         end
       end
 
-      expect(serializer.serialize(double(:thing, foo: 'bar'), some: 'scope')).to eq('hello_foo' => 'Hello, bar')
+      expect(serializer.serialize(double(:thing, foo: 'bar'), some: 'scope')).to eq({ 'hello_foo' => 'Hello, bar' })
     end
 
     it 'should allow referencing a Serializable instance directly' do
@@ -46,24 +46,24 @@ describe SimpleSchemaSerializers::Serializer do
       end
 
       resource = double(:parent, child: double(:child, foo: 'bar'))
-      expect(parent_serializer.serialize(resource)).to eq(
-        'child' => {
-          'foo' => 'bar'
-        }
-      )
-      expect(parent_serializer.schema).to eq(
-        'type' => 'object',
-        'required' => ['child'],
-        'properties' => {
-          'child' => {
-            'type' => 'object',
-            'required' => ['foo'],
-            'properties' => {
-              'foo' => { 'type' => 'string' }
-            }
-          }
-        }
-      )
+      expect(parent_serializer.serialize(resource)).to eq({
+                                                            'child' => {
+                                                              'foo' => 'bar'
+                                                            }
+                                                          })
+      expect(parent_serializer.schema).to eq({
+                                               'type' => 'object',
+                                               'required' => ['child'],
+                                               'properties' => {
+                                                 'child' => {
+                                                   'type' => 'object',
+                                                   'required' => ['foo'],
+                                                   'properties' => {
+                                                     'foo' => { 'type' => 'string' }
+                                                   }
+                                                 }
+                                               }
+                                             })
     end
 
     it 'should allow you to specify a different name for an attribute than the source object' do
@@ -71,7 +71,7 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :hello_foo, :string, source: :foo
       end
 
-      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq('hello_foo' => 'bar')
+      expect(serializer.serialize(double(:thing, foo: 'bar'))).to eq({ 'hello_foo' => 'bar' })
     end
 
     describe 'Hash objects' do
@@ -79,42 +79,42 @@ describe SimpleSchemaSerializers::Serializer do
         serializer = create_serializer do
           attribute :foo, :string
         end
-        expect(serializer.serialize(foo: 'bar')).to eq('foo' => 'bar')
+        expect(serializer.serialize({ foo: 'bar' })).to eq({ 'foo' => 'bar' })
       end
 
       it 'should allow string keys as well as symbol keys' do
         serializer = create_serializer do
           attribute :foo, :string
         end
-        expect(serializer.serialize('foo' => 'bar')).to eq('foo' => 'bar')
+        expect(serializer.serialize({ 'foo' => 'bar' })).to eq({ 'foo' => 'bar' })
       end
 
       it 'should prefer symbol keys to string keys' do
         serializer = create_serializer do
           attribute :foo, :string
         end
-        expect(serializer.serialize('foo' => 'string', :foo => 'symbol')).to eq('foo' => 'symbol')
+        expect(serializer.serialize({ 'foo' => 'string', :foo => 'symbol' })).to eq({ 'foo' => 'symbol' })
       end
 
       it 'should allow specifying a source key' do
         serializer = create_serializer do
           attribute :foo, :string, source: :bar
         end
-        expect(serializer.serialize('bar' => 'baz')).to eq('foo' => 'baz')
+        expect(serializer.serialize({ 'bar' => 'baz' })).to eq({ 'foo' => 'baz' })
       end
 
       it 'should error if the source is missing' do
         serializer = create_serializer do
           attribute :foo, :string
         end
-        expect { serializer.serialize('bar' => 'baz') }.to raise_error(SimpleSchemaSerializers::DeclarationError)
+        expect { serializer.serialize({ 'bar' => 'baz' }) }.to raise_error(SimpleSchemaSerializers::DeclarationError)
       end
 
       it 'should not error if allow_missing_key is provided' do
         serializer = create_serializer do
           attribute :foo, :string?, allow_missing_key: true
         end
-        expect(serializer.serialize('bar' => 'baz')).to eq('foo' => nil)
+        expect(serializer.serialize({ 'bar' => 'baz' })).to eq({ 'foo' => nil })
       end
 
       it 'should allow allow_missing_key to also be set for the whole serializer' do
@@ -124,7 +124,7 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :bar, :integer, allow_missing_key: false
           attribute :baz, :integer?
         end
-        expect(serializer.serialize('bar' => 1)).to eq('foo' => nil, 'bar' => 1, 'baz' => nil)
+        expect(serializer.serialize({ 'bar' => 1 })).to eq({ 'foo' => nil, 'bar' => 1, 'baz' => nil })
       end
 
       it 'should still prefer serializer methods to hash keys' do
@@ -134,14 +134,14 @@ describe SimpleSchemaSerializers::Serializer do
             'foo2'
           end
         end
-        expect(serializer.serialize('foo' => 'foo1')).to eq('foo' => 'foo2')
+        expect(serializer.serialize({ 'foo' => 'foo1' })).to eq({ 'foo' => 'foo2' })
       end
 
       it 'should not error if a built-in method name is used as a hash key' do
         serializer = create_serializer do
           attribute :method, :string
         end
-        expect(serializer.serialize('method' => 'foo')).to eq('method' => 'foo')
+        expect(serializer.serialize({ 'method' => 'foo' })).to eq({ 'method' => 'foo' })
       end
 
       it 'should allow hidden attributes' do
@@ -149,11 +149,11 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :documented, :string
           attribute :undocumented, :string, hidden: true
         end
-        expect(serializer.schema).to eq(
-          'type' => 'object',
-          'required' => ['documented'],
-          'properties' => { 'documented' => { 'type' => 'string' } }
-        )
+        expect(serializer.schema).to eq({
+                                          'type' => 'object',
+                                          'required' => ['documented'],
+                                          'properties' => { 'documented' => { 'type' => 'string' } }
+                                        })
         expect(serializer.serialize(double(:thing, documented: 'yes', undocumented: 'no'))).to eq(
           'documented' => 'yes',
           'undocumented' => 'no'
@@ -170,8 +170,8 @@ describe SimpleSchemaSerializers::Serializer do
         yes_resource = double(:yes, conditional: 'foo', other: 'other', condition: true)
         no_resource = double(:no, conditional: 'foo', other: 'other', condition: false)
 
-        expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
-        expect(serializer.serialize(no_resource)).to eq('other' => 'other')
+        expect(serializer.serialize(yes_resource)).to eq({ 'conditional' => 'foo', 'other' => 'other' })
+        expect(serializer.serialize(no_resource)).to eq({ 'other' => 'other' })
       end
 
       it 'via lambda' do
@@ -182,8 +182,8 @@ describe SimpleSchemaSerializers::Serializer do
         yes_resource = double(:yes, conditional: 'foo', other: 'other', condition: true)
         no_resource = double(:no, conditional: 'foo', other: 'other', condition: false)
 
-        expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
-        expect(serializer.serialize(no_resource)).to eq('other' => 'other')
+        expect(serializer.serialize(yes_resource)).to eq({ 'conditional' => 'foo', 'other' => 'other' })
+        expect(serializer.serialize(no_resource)).to eq({ 'other' => 'other' })
       end
 
       it 'via serializer method' do
@@ -198,8 +198,8 @@ describe SimpleSchemaSerializers::Serializer do
         yes_resource = double(:yes, conditional: 'foo', other: 'other')
         no_resource = double(:no, conditional: 'bar', other: 'other')
 
-        expect(serializer.serialize(yes_resource)).to eq('conditional' => 'foo', 'other' => 'other')
-        expect(serializer.serialize(no_resource)).to eq('other' => 'other')
+        expect(serializer.serialize(yes_resource)).to eq({ 'conditional' => 'foo', 'other' => 'other' })
+        expect(serializer.serialize(no_resource)).to eq({ 'other' => 'other' })
       end
     end
 
@@ -214,13 +214,13 @@ describe SimpleSchemaSerializers::Serializer do
         end
 
         resource = double(:parent, name: 'x', child: double(:child, foo: 'foo', bar: nil))
-        expect(serializer.serialize(resource)).to eq(
-          'name' => 'x',
-          'child' => {
-            'foo' => 'foo',
-            'bar' => nil
-          }
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'name' => 'x',
+                                                       'child' => {
+                                                         'foo' => 'foo',
+                                                         'bar' => nil
+                                                       }
+                                                     })
       end
 
       it 'should allow defining optional anonymous nested serializers' do
@@ -233,10 +233,10 @@ describe SimpleSchemaSerializers::Serializer do
         end
 
         resource = double(:thing, name: 'x', child: nil)
-        expect(serializer.serialize(resource)).to eq(
-          'name' => 'x',
-          'child' => nil
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'name' => 'x',
+                                                       'child' => nil
+                                                     })
         schema = serializer.schema
         expect(schema['properties']['child']['oneOf'][0]['type']).to eq 'null'
         expect(schema['properties']['child']['oneOf'][1]['type']).to eq 'object'
@@ -254,13 +254,13 @@ describe SimpleSchemaSerializers::Serializer do
         end
 
         resource = double(:parent, name: 'x', child: [double(:child, foo: 'foo', bar: nil)])
-        expect(serializer.serialize(resource)).to eq(
-          'name' => 'x',
-          'child' => [{
-            'foo' => 'foo',
-            'bar' => nil
-          }]
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'name' => 'x',
+                                                       'child' => [{
+                                                         'foo' => 'foo',
+                                                         'bar' => nil
+                                                       }]
+                                                     })
         schema = serializer.schema
         expect(schema['properties']['child']['type']).to eq 'array'
         expect(schema['properties']['child']['items']['type']).to eq 'object'
@@ -279,13 +279,13 @@ describe SimpleSchemaSerializers::Serializer do
         end
 
         resource = double(:parent, name: 'x', child: [nil, double(:child, foo: 'foo', bar: nil)])
-        expect(serializer.serialize(resource)).to eq(
-          'name' => 'x',
-          'child' => [nil, {
-            'foo' => 'foo',
-            'bar' => nil
-          }]
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'name' => 'x',
+                                                       'child' => [nil, {
+                                                         'foo' => 'foo',
+                                                         'bar' => nil
+                                                       }]
+                                                     })
         schema = serializer.schema
         expect(schema['properties']['child']['type']).to eq 'array'
         expect(schema['properties']['child']['items']['oneOf'][0]['type']).to eq 'null'
@@ -304,10 +304,10 @@ describe SimpleSchemaSerializers::Serializer do
         end
 
         resource = double(:thing, name: 'x', child: nil)
-        expect(serializer.serialize(resource)).to eq(
-          'name' => 'x',
-          'child' => nil
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'name' => 'x',
+                                                       'child' => nil
+                                                     })
         schema = serializer.schema
         expect(schema['properties']['child']['oneOf'][0]['type']).to eq 'null'
         expect(schema['properties']['child']['oneOf'][1]['type']).to eq 'array'
@@ -350,11 +350,11 @@ describe SimpleSchemaSerializers::Serializer do
         resource = double(:parent,
                           child: double(:child1, foo: 'child_foo'),
                           child_array: [double(:child2, foo: 'child_array_foo')])
-        expect(serializer.serialize(resource)).to eq(
-          'foo' => 'parent_foo',
-          'child' => { 'foo' => 'child_foo' },
-          'child_array' => [{ 'foo' => 'child_array_foo' }]
-        )
+        expect(serializer.serialize(resource)).to eq({
+                                                       'foo' => 'parent_foo',
+                                                       'child' => { 'foo' => 'child_foo' },
+                                                       'child_array' => [{ 'foo' => 'child_array_foo' }]
+                                                     })
       end
     end
 
@@ -379,27 +379,27 @@ describe SimpleSchemaSerializers::Serializer do
                                     multipleOf: 10, exclusiveMinimum: 0, maximum: 100, examples: [10, 20, 30, 40]
         end
 
-        expect(serializer.schema['properties']['foo']).to eq(
-          'type' => 'string',
-          'enum' => ['a', 'b', 'c'],
-          'default' => 'a',
-          'minLength' => 1,
-          'maxLength' => 1
-        )
-        expect(serializer.schema['properties']['email']).to eq(
-          'type' => ['string', 'null'],
-          'format' => :email,
-          'example' => 'help@example.com',
-          'pattern' => '.+@.+'
-        )
-        expect(serializer.schema['properties']['age']).to eq(
-          'type' => 'integer',
-          'description' => 'inline description',
-          'multipleOf' => 10,
-          'exclusiveMinimum' => 0,
-          'maximum' => 100,
-          'examples' => [10, 20, 30, 40]
-        )
+        expect(serializer.schema['properties']['foo']).to eq({
+                                                               'type' => 'string',
+                                                               'enum' => ['a', 'b', 'c'],
+                                                               'default' => 'a',
+                                                               'minLength' => 1,
+                                                               'maxLength' => 1
+                                                             })
+        expect(serializer.schema['properties']['email']).to eq({
+                                                                 'type' => ['string', 'null'],
+                                                                 'format' => :email,
+                                                                 'example' => 'help@example.com',
+                                                                 'pattern' => '.+@.+'
+                                                               })
+        expect(serializer.schema['properties']['age']).to eq({
+                                                               'type' => 'integer',
+                                                               'description' => 'inline description',
+                                                               'multipleOf' => 10,
+                                                               'exclusiveMinimum' => 0,
+                                                               'maximum' => 100,
+                                                               'examples' => [10, 20, 30, 40]
+                                                             })
       end
 
       it 'should allow you to define object schema options' do
@@ -427,14 +427,14 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :conditional, :string, if: proc { false }
           attribute :other, :string
         end
-        expect(serializer.schema).to eq(
-          'type' => 'object',
-          'required' => ['other'],
-          'properties' => {
-            'conditional' => { 'type' => 'string' },
-            'other' => { 'type' => 'string' }
-          }
-        )
+        expect(serializer.schema).to eq({
+                                          'type' => 'object',
+                                          'required' => ['other'],
+                                          'properties' => {
+                                            'conditional' => { 'type' => 'string' },
+                                            'other' => { 'type' => 'string' }
+                                          }
+                                        })
       end
     end
 
@@ -452,14 +452,14 @@ describe SimpleSchemaSerializers::Serializer do
       end
       resource = double(:parent, primitive_array: ['a', 'b'], object_array: [double(:child, foo: 'bar')])
 
-      expect(parent_serializer.serialize(resource)).to eq(
-        'primitive_array' => ['a', 'b'],
-        'object_array' => [{ 'foo' => 'bar' }]
-      )
-      expect(parent_serializer.schema['properties']['primitive_array']).to eq(
-        'type' => 'array',
-        'items' => { 'type' => 'string' }
-      )
+      expect(parent_serializer.serialize(resource)).to eq({
+                                                            'primitive_array' => ['a', 'b'],
+                                                            'object_array' => [{ 'foo' => 'bar' }]
+                                                          })
+      expect(parent_serializer.schema['properties']['primitive_array']).to eq({
+                                                                                'type' => 'array',
+                                                                                'items' => { 'type' => 'string' }
+                                                                              })
       expect(parent_serializer.schema['properties']['object_array']['type']).to eq 'array'
       expect(parent_serializer.schema['properties']['object_array']['items']['type']).to eq 'object'
     end
@@ -490,7 +490,7 @@ describe SimpleSchemaSerializers::Serializer do
         attribute :foo, :string, default: 'unknown'
       end
       expect(serializer.schema['properties']['foo']['default']).to eq 'unknown'
-      expect(serializer.serialize(double(:thing, foo: nil))).to eq('foo' => 'unknown')
+      expect(serializer.serialize(double(:thing, foo: nil))).to eq({ 'foo' => 'unknown' })
     end
 
     it 'should allow you to provide attribute defaults' do
@@ -539,7 +539,7 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :name, :string
         end
       end
-      expect(child.serialize(double(:thing, id: 1, name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
+      expect(child.serialize(double(:thing, id: 1, name: 'foo'))).to eq({ 'id' => 1, 'name' => 'foo' })
     end
 
     it 'should allow removing inherited attributes' do
@@ -554,7 +554,7 @@ describe SimpleSchemaSerializers::Serializer do
           remove_attribute :foo
         end
       end
-      expect(child.serialize(double(:thing, id: 1, foo: 'bar', name: 'foo'))).to eq('id' => 1, 'name' => 'foo')
+      expect(child.serialize(double(:thing, id: 1, foo: 'bar', name: 'foo'))).to eq({ 'id' => 1, 'name' => 'foo' })
     end
 
     it 'should allow inheriting attribute defaults' do
@@ -596,9 +596,9 @@ describe SimpleSchemaSerializers::Serializer do
           attribute :user, :user
         end
       end
-      expect(child.serialize(double(:parent, user: double(:user, name: 'foo')))).to eq(
-        'user' => { 'name' => 'foo' }
-      )
+      expect(child.serialize(double(:parent, user: double(:user, name: 'foo')))).to eq({
+                                                                                         'user' => { 'name' => 'foo' }
+                                                                                       })
     end
 
     it 'should allow inheriting validation options' do
@@ -739,11 +739,21 @@ describe SimpleSchemaSerializers::Serializer do
       expect(user_serializer.schema['type']).to eq 'object'
       expect(user_serializer.schema['$ref']).to be_nil
 
-      expect(organization_serializer.schema['properties']['ceo']).to eq('$ref' => '#/definitions/User')
-      expect(organization_serializer.schema['properties']['owner']['oneOf'][1]).to eq('$ref' => '#/definitions/User')
-      expect(organization_serializer.schema['properties']['employees']['items']).to eq('$ref' => '#/definitions/User')
+      expect(organization_serializer.schema['properties']['ceo']).to eq({ '$ref' => '#/definitions/User' })
+      expect(organization_serializer.schema['properties']['owner']['oneOf'][1]).to eq(
+        {
+          '$ref' => '#/definitions/User'
+        }
+      )
+      expect(organization_serializer.schema['properties']['employees']['items']).to eq(
+        {
+          '$ref' => '#/definitions/User'
+        }
+      )
       expect(organization_serializer.schema['properties']['founders']['oneOf'][1]['items']).to eq(
-        '$ref' => '#/definitions/User'
+        {
+          '$ref' => '#/definitions/User'
+        }
       )
       expect(organization_serializer.schema['type']).to eq 'object'
       expect(organization_serializer.schema['$ref']).to be_nil
@@ -829,8 +839,8 @@ describe SimpleSchemaSerializers::Serializer do
               end
             end
           end
-          expect(serializer.serialize({ 'one' => 'foo' }, one: true)).to eq('one' => 'foo')
-          expect(serializer.serialize({ 'two' => 2 }, one: false)).to eq('two' => 2)
+          expect(serializer.serialize({ 'one' => 'foo' }, one: true)).to eq({ 'one' => 'foo' })
+          expect(serializer.serialize({ 'two' => 2 }, one: false)).to eq({ 'two' => 2 })
         end
 
         it 'should error if you try to serialize without specifying a selector' do
@@ -846,7 +856,7 @@ describe SimpleSchemaSerializers::Serializer do
             end
           end
           expect do
-            serializer.serialize('one' => 'foo')
+            serializer.serialize({ 'one' => 'foo' })
           end.to raise_error(/Must define a selector/)
         end
       end
@@ -881,7 +891,7 @@ describe SimpleSchemaSerializers::Serializer do
             end
           end
         end
-        expect(serializer.serialize(one: 'one', two: 2)).to eq('one' => 'one', 'two' => 2)
+        expect(serializer.serialize({ one: 'one', two: 2 })).to eq({ 'one' => 'one', 'two' => 2 })
       end
     end
   end

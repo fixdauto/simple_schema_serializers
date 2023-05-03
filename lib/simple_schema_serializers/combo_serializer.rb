@@ -19,14 +19,14 @@ module SimpleSchemaSerializers
       @selector = selector
     end
 
-    def schema(additional_options = {})
-      { KEY_NAME[@type] => @options.map { |_, delegate| delegate.schema(additional_options) } }
+    def schema(**additional_options)
+      { KEY_NAME[@type] => @options.map { |_, delegate| delegate.schema(**additional_options) } }
     end
 
-    def serialize(resource, options = {})
+    def serialize(resource, **options)
       if merge?
         return @options.each_with_object({}) do |(_name, delegate), hash|
-          hash.merge!(delegate.serialize(resource, options))
+          hash.merge!(delegate.serialize(resource, **options))
         end
       end
       # otherwise use selector
@@ -37,7 +37,7 @@ module SimpleSchemaSerializers
         raise DeclarationError, "Invalid option selected: #{option_name}. Declared options are: #{@options.keys}"
       end
 
-      @options[option_name].serialize(resource, options)
+      @options[option_name].serialize(resource, **options)
     end
 
     def any_of?

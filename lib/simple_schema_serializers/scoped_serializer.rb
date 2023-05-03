@@ -16,12 +16,12 @@ module SimpleSchemaSerializers
       @default_options = default_options
     end
 
-    def serialize(resource, options = {})
-      @delegate.serialize(resource, @default_options.merge(options))
+    def serialize(resource, **options)
+      @delegate.serialize(resource, **@default_options.merge(options))
     end
 
-    def schema(additional_options = {})
-      @delegate.schema(@default_options.merge(additional_options))
+    def schema(**additional_options)
+      @delegate.schema(**@default_options.merge(additional_options))
     end
 
     def inspect

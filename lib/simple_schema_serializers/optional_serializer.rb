@@ -15,14 +15,14 @@ module SimpleSchemaSerializers
       @delegate = delegate
     end
 
-    def serialize(resource, options = {})
+    def serialize(resource, **options)
       return nil if resource.nil?
 
-      @delegate.serialize(resource, options)
+      @delegate.serialize(resource, **options)
     end
 
-    def schema(additional_options = {})
-      parent_schema = @delegate.schema(additional_options)
+    def schema(**additional_options)
+      parent_schema = @delegate.schema(**additional_options)
       return { 'oneOf' => [{ 'type' => 'null' }, parent_schema] } if non_primitive?
 
       parent_schema['type'] = delegate_types + ['null']

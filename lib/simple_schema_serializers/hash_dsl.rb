@@ -27,22 +27,22 @@ module SimpleSchemaSerializers
     # [+opts.if+]      conditonally add the attribute to the output. A proc/lambda or a method name on the object
     # [+opts.default+] if `nil`, return the serialized representation of this value instead
     # in addition, any json-schema keys in +opts+ will be included in the json-schema, e.g. `format`, `enum`, etc.
-    def attribute(name, serializer, opts = {})
+    def attribute(name, serializer, **opts)
       serializer_defaults = serializer_option_defaults(serializer)
       opts = attribute_defaults.merge(serializer_defaults).merge({ description: @desc }.compact).merge(opts)
       @desc = nil # clear the description out so it doesn't get written to all subsequent attributes
       attributes << Attribute.new(name, lookup_serializer(serializer), opts)
     end
 
-    def hash_attribute(name, opts = {}, &)
+    def hash_attribute(name, **opts, &)
       serializer = Class.new(HashSerializer)
       serializer.inherit_configuration_from(self, include_attributes: false)
       serializer.instance_exec(&)
       serializer = serializer.optional if opts.delete(:optional)
-      attribute(name, serializer, opts)
+      attribute(name, serializer, **opts)
     end
 
-    def array_attribute(name, opts = {}, &)
+    def array_attribute(name, **opts, &)
       desc = @desc
       @desc = nil
       serializer, item_opts = ArrayDSL.new(self).invoke(&)
@@ -50,11 +50,11 @@ module SimpleSchemaSerializers
       array_opts, attribute_opts = opts.partition do |k, _|
         [*JSONSchema::ARRAY_KEYS, *JSONSchema::COMMON_KEYS].include?(k.to_s)
       end.map(&:to_h)
-      serializer = lookup_serializer(serializer).array({ description: desc }.compact.merge(array_opts))
+      serializer = lookup_serializer(serializer).array(**{ description: desc }.compact.merge(array_opts))
       serializer = serializer.optional if optional
       # TODO: probably not the best to just merge these together. Fundementally there needs to be a clearer
       # separation of which options go where
-      attribute(name, serializer, item_opts.merge(attribute_opts))
+      attribute(name, serializer, **item_opts.merge(attribute_opts))
     end
 
     def remove_attribute(name)

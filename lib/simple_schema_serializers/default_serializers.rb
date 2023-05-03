@@ -10,11 +10,7 @@ module SimpleSchemaSerializers
   module PrimitiveMethodSerializer
     include Serializable
 
-    # def serialize(resource, _options = {})
-    #   resource.send(config[:method_name])
-    # end
-
-    def schema(additional_options = {})
+    def schema(**additional_options)
       base_schema.merge(additional_options).transform_keys(&:to_s).slice(*allowed_keys).compact
     end
   end
@@ -25,7 +21,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, _options = {})
+      def serialize(resource, **)
         resource.to_s
       end
 
@@ -43,7 +39,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, _options = {})
+      def serialize(resource, **)
         resource.to_i
       end
 
@@ -61,7 +57,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, options = {})
+      def serialize(resource, **options)
         value = resource.to_f
         value = value.round(options[:round]) if options[:round]
         value
@@ -81,7 +77,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, _options = {})
+      def serialize(resource, **)
         !!resource
       end
 
@@ -99,7 +95,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, _options = {})
+      def serialize(resource, **)
         resource.iso8601
       end
 
@@ -117,7 +113,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, options = {})
+      def serialize(resource, **options)
         return resource.iso8601(options[:fraction_digits] || 3) if resource.respond_to?(:iso8601)
 
         resource.strftime('%Y-%m-%dT%H:%M:%S.%L%z')
@@ -137,7 +133,7 @@ module SimpleSchemaSerializers
       include PrimitiveMethodSerializer
       extend self
 
-      def serialize(resource, _options = {})
+      def serialize(resource, **)
         as_json(resource.to_h)
       end
 

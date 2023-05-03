@@ -39,15 +39,15 @@ module SimpleSchemaSerializers
 
     def serialize(serializer_instance)
       value = value_from(serializer_instance) || default_value
-      serializer.serialize(value, @options.merge(serializer_instance.options))
+      serializer.serialize(value, **@options.merge(serializer_instance.options))
     end
 
     def required?
       @required
     end
 
-    def schema(additional_options = {})
-      serializer.schema(@options.transform_keys(&:to_s).merge(additional_options))
+    def schema(**additional_options)
+      serializer.schema(**@options.transform_keys(&:to_s).merge(additional_options))
     end
 
     private

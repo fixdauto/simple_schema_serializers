@@ -25,7 +25,7 @@ module SimpleSchemaSerializers
 
     # ensure the schema method always returns string keys
     module SanitizeSchema
-      def schema(*args)
+      def schema(...)
         super.transform_keys(&:to_s)
       end
     end
@@ -33,7 +33,7 @@ module SimpleSchemaSerializers
     ##
     # convert the +resource+ (target object) and +scope+ (optional hash of arbitrary data) into
     # a serialized representation.
-    def serialize(_resource, _options = {})
+    def serialize(_resource, **)
       raise DeclarationError, "The `serialize` method on #{inspect} has not been defined"
     end
 
@@ -41,7 +41,7 @@ module SimpleSchemaSerializers
     # Return the json-schema definition of the serialized representation.
     # This site can be very helpful in understanding the json-schema standard:
     #   https://json-schema.org/understanding-json-schema/index.html
-    def schema(_additional_options = {})
+    def schema(**)
       raise DeclarationError, "The `schema` method on #{inspect} has not been defined"
     end
 
@@ -62,11 +62,11 @@ module SimpleSchemaSerializers
     ##
     # Get a version of this serializer that can handle an array of resources instead of a single resource.
     # +schema_args+ are added to the json-schema definition.
-    def array(schema_args = {})
+    def array(**schema_args)
       ArraySerializer.new(self, schema_args)
     end
 
-    def with_options(default_options)
+    def with_options(**default_options)
       ScopedSerializer.new(self, default_options)
     end
 

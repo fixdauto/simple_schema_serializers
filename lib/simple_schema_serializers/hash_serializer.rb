@@ -126,7 +126,7 @@ module SimpleSchemaSerializers
       # rubocop:enable Metrics/ParameterLists
 
       def serialize(resource, options = {})
-        return @combo.serialize(resource, options) if @combo
+        return @combo.serialize(resource, **options) if @combo
 
         serializer_instance = new(resource, options)
         attributes.each_with_object({}) do |attribute, hash|
@@ -136,9 +136,9 @@ module SimpleSchemaSerializers
         end
       end
 
-      def schema(additional_options = {})
+      def schema(**additional_options)
         additional_options = additional_options.dup
-        return @combo.schema(additional_options) if @combo
+        return @combo.schema(**additional_options) if @combo
 
         HashSchemaGenerator.new(self, additional_options).schema
       end

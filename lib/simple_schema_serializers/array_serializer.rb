@@ -10,17 +10,17 @@ module SimpleSchemaSerializers
   class ArraySerializer
     include Serializable
 
-    def initialize(delegate, array_opts = {})
+    def initialize(delegate, array_opts)
       @delegate = delegate
       @array_opts = array_opts
     end
 
-    def serialize(resources, options = {})
-      resources.map { |resource| @delegate.serialize(resource, options) }
+    def serialize(resources, **options)
+      resources.map { |resource| @delegate.serialize(resource, **options) }
     end
 
-    def schema(additional_options = {})
-      element_schema = @delegate.schema(additional_options)
+    def schema(**additional_options)
+      element_schema = @delegate.schema(**additional_options)
       unsanitized_schema = @array_opts.merge(type: 'array', items: element_schema)
       unsanitized_schema.transform_keys(&:to_s).slice(*JSONSchema::ARRAY_KEYS, *JSONSchema::COMMON_KEYS).compact
     end

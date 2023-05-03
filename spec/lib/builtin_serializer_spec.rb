@@ -97,11 +97,11 @@ describe 'Built-in serializers' do
   before do
     stub_const('StringSerializer', Class.new do
       extend SimpleSchemaSerializers::Serializable
-      def self.serialize(resource, _scope = {})
+      def self.serialize(resource, **)
         resource.to_s
       end
 
-      def self.schema(additional_options = {})
+      def self.schema(**additional_options)
         { type: 'string' }.merge(additional_options)
       end
     end)

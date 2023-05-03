@@ -10,7 +10,7 @@ module SimpleSchemaSerializers
       @called = false
     end
 
-    def items(serializer = nil, opts = {}, &block)
+    def items(serializer = nil, **opts, &block)
       raise DeclarationError, 'Called `items` twice in `array_attribute`' if @called
 
       @called = true
