@@ -4,7 +4,7 @@ Simple Schema Serializers
 This gem provides a simple way to build systems for serializing Ruby classes into JSON. It's modeled after [Active Model Serializers](https://github.com/rails-api/active_model_serializers) but is simpler, faster, and maintained.
 
 ```ruby
-gem 'simple_schema_serializers', git: 'https://github.com/fixdauto/simple_schema_serializers.git', ref: 'v1.3.0'
+gem 'simple_schema_serializers', git: 'https://github.com/fixdauto/simple_schema_serializers.git', ref: 'v2.0.0'
 ```
 
 Example
