@@ -149,6 +149,7 @@ Aliases for the following common primitive serializers are included by default:
 - `:float`, `:float?`, `:decimal`, `:decimal?`, `:double`, `:double?`
 - `:boolean`, `:boolean?`
 - `:date`, `:date?`, `:datetime`, `:datetime?`
+- `:arbitrary_hash`, `:arbitrary_hash?`
 
 ### Key transformations
 

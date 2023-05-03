@@ -14,6 +14,7 @@ module SimpleSchemaSerializers
                                                                      default_options: { format: 'float' }
     register_serializer :double, DefaultSerializers::FloatSerializer, default_options: { format: 'double' }
     register_serializer :boolean, DefaultSerializers::BooleanSerializer, aliases: [:bool]
+    register_serializer :arbitrary_hash, DefaultSerializers::ArbitraryHashSerializer, aliases: [:hash, :dict, :map]
 
     # The default serialization for dates and times (Date, DateTime, Time, etc.) is iso8601
     # but feel free to override these with a different implementation if you use a different format

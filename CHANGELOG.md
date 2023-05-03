@@ -1,3 +1,7 @@
+# 1.2.1
+
+Add support for `:arbitrary_hash` built-in type, an object without explicitly-defined key-value pairs.
+
 # 1.2.0
 
 Add support for `with_options`

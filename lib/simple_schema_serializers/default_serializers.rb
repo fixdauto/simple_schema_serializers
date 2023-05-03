@@ -2,6 +2,7 @@
 
 require 'simple_schema_serializers/json_schema'
 require 'simple_schema_serializers/serializable'
+require 'json'
 
 module SimpleSchemaSerializers
   # A +Serializable+ implementation that simply calls a single method
@@ -128,6 +129,43 @@ module SimpleSchemaSerializers
 
       def allowed_keys
         JSONSchema::STRING_KEYS
+      end
+    end
+
+    # Serializer for a hash with arbirary, undefined key-value pairs
+    module ArbitraryHashSerializer
+      include PrimitiveMethodSerializer
+      extend self
+
+      def serialize(resource, _options = {})
+        as_json(resource.to_h)
+      end
+
+      # Simple, recursive as_json method (since we aren't necessarily
+      # in a rails environment, we have to implement it ourselves).
+      # Stringifies keys but leaves primitives as-is.
+      def as_json(obj)
+        case obj
+        when Array
+          obj.map { |v| as_json(v) }
+        when Hash
+          obj.to_h { |k, v| [k.to_s, as_json(v)] }
+        else
+          obj
+        end
+      end
+
+      def base_schema
+        {
+          type: 'object',
+          properties: {},
+          required: [],
+          additionalProperties: { type: 'string' }
+        }
+      end
+
+      def allowed_keys
+        JSONSchema::OBJECT_KEYS
       end
     end
   end
