@@ -27,6 +27,9 @@ describe 'Built-in serializers' do
       attribute 'rounded_float', :float, round: 2
       attribute 'rounded_decimal', :decimal, round: 2
       attribute 'rounded_double', :double, round: 4
+
+      attribute 'anyhash', :arbitrary_hash
+      attribute 'optional_anyhash', :arbitrary_hash?
     end)
   end
 
@@ -52,7 +55,12 @@ describe 'Built-in serializers' do
                                        optional_date: nil,
                                        rounded_float: Math::PI,
                                        rounded_decimal: Math::PI,
-                                       rounded_double: Math::PI))
+                                       rounded_double: Math::PI,
+                                       anyhash: {
+                                         'foo' => 'bar',
+                                         baz: true
+                                       },
+                                       optional_anyhash: nil))
   end
 
   it 'should serialize the default primitive types and their optionals' do
@@ -77,7 +85,12 @@ describe 'Built-in serializers' do
       'optional_date' => nil,
       'rounded_float' => 3.14,
       'rounded_decimal' => 3.14,
-      'rounded_double' => 3.1416
+      'rounded_double' => 3.1416,
+      'anyhash' => {
+        'foo' => 'bar',
+        'baz' => true
+      },
+      'optional_anyhash' => nil
     )
   end
 
