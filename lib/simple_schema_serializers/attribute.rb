@@ -20,7 +20,9 @@ module SimpleSchemaSerializers
     def key(serializer_instance)
       return name unless @key_transform
       return @key_transform.call(name) if @key_transform.respond_to?(:call)
-      return serializer_instance.send(@key_transform, name) if serializer_instance.respond_to?(@key_transform)
+      if maybe_private_method?(serializer_instance, @key_transform, all_methods: true)
+        return serializer_instance.send(@key_transform, name)
+      end
 
       name.public_send(@key_transform)
     end
@@ -53,7 +55,7 @@ module SimpleSchemaSerializers
     def value_from(serializer_instance)
       if serializer_instance.object.is_a?(Hash)
         value_from_hash(serializer_instance)
-      elsif serializer_instance.respond_to?(source)
+      elsif maybe_private_method?(serializer_instance, source)
         serializer_instance.send(source)
       elsif serializer_instance.object.respond_to?(source, false)
         serializer_instance.object.public_send(source)
@@ -67,7 +69,7 @@ module SimpleSchemaSerializers
     end
 
     def value_from_hash(serializer_instance)
-      if local_respond_to?(serializer_instance, source)
+      if maybe_private_method?(serializer_instance, source)
         serializer_instance.send(source)
       elsif serializer_instance.object.key?(source)
         serializer_instance.object[source]
@@ -93,17 +95,17 @@ module SimpleSchemaSerializers
     def check_condition(serializer_instance)
       if @conditional.respond_to?(:call)
         serializer_instance.instance_exec(&@conditional)
-      elsif serializer_instance.respond_to?(@conditional)
+      elsif maybe_private_method?(serializer_instance, @conditional)
         serializer_instance.send(@conditional)
       else
         serializer_instance.object.public_send(@conditional)
       end
     end
 
-    def local_respond_to?(serializer_instance, source)
-      serializer_instance.public_methods(false).include?(source) ||
-        serializer_instance.protected_methods(false).include?(source) ||
-        serializer_instance.private_methods(false).include?(source)
+    def maybe_private_method?(serializer_instance, source, all_methods: false)
+      serializer_instance.public_methods(all_methods).include?(source) ||
+        serializer_instance.protected_methods(all_methods).include?(source) ||
+        serializer_instance.private_methods(all_methods).include?(source)
     end
   end
 end
