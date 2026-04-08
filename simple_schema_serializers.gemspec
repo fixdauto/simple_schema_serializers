@@ -14,12 +14,13 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/fixdauto/simple_schema_serializers'
   spec.summary     = 'Fast model serializers with json-schema generation'
   spec.licenses    = ['MIT']
-  spec.required_ruby_version = '>= 3.1'
+  spec.required_ruby_version = '~> 4.0.1'
 
   spec.files = Dir['lib/**/*', 'Rakefile', 'README.md']
 
   spec.add_dependency 'case_transform', '~> 0.2'
-  spec.add_dependency 'json-schema', '~> 2.8.0'
+  spec.add_dependency 'json-schema', '~> 6.2.0'
+  spec.add_dependency 'ostruct', '~> 0.6.3'
 
   spec.metadata['allowed_push_host'] = 'http://rubygems.org'
   spec.metadata['rubygems_mfa_required'] = 'true'

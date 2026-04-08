@@ -1,3 +1,8 @@
+# 2.0.1
+
+- Ruby 4
+- json-schema 6
+
 # 2.0.0
 
 Set minimum Ruby version to 3.2 and convert hash arguments to keyword arguments. This is a breaking change as it may break the interface for `serialize` and `schema` methods.
