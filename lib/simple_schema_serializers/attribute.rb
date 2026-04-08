@@ -55,7 +55,7 @@ module SimpleSchemaSerializers
     def value_from(serializer_instance)
       if serializer_instance.object.is_a?(Hash)
         value_from_hash(serializer_instance)
-      elsif maybe_private_method?(serializer_instance, source)
+      elsif maybe_private_method?(serializer_instance, source, all_methods: true)
         serializer_instance.send(source)
       elsif serializer_instance.object.respond_to?(source, false)
         serializer_instance.object.public_send(source)
@@ -95,7 +95,7 @@ module SimpleSchemaSerializers
     def check_condition(serializer_instance)
       if @conditional.respond_to?(:call)
         serializer_instance.instance_exec(&@conditional)
-      elsif maybe_private_method?(serializer_instance, @conditional)
+      elsif maybe_private_method?(serializer_instance, @conditional, all_methods: true)
         serializer_instance.send(@conditional)
       else
         serializer_instance.object.public_send(@conditional)
